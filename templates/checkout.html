@@ -1,0 +1,7 @@
+{% extends "base.html" %}{% load ui %}{% block content %}
+<section class="max-w-md mx-auto px-4 py-12"><h1 class="font-serif text-4xl">Checkout</h1>
+<div class="mt-6 rounded-3xl bg-white border border-sand p-6"><p class="font-semibold">{{ b.slot.tour.title }}</p>
+<p class="text-sm text-indigo/70">{{ b.slot.date|date:"D, d M" }} · {{ b.guests }} guest(s)</p><p class="font-serif text-3xl mt-3">₹{{ b.total }}</p>
+<p class="text-xs mt-2 text-indigo/60 flex items-center gap-1">{% icon "shield" "w-4 h-4" %} Seats held for 15 minutes. Card details never touch our servers.</p>
+<form method="post" class="mt-5 space-y-3">{% csrf_token %}
+{% for p in providers %}<button name="provider" value="{{ p }}" class="btn w-full {% if not forloop.first %}btn-ghost{% endif %}">{% if p == "razorpay" %}Pay with UPI / Cards / Netbanking (Razorpay){% elif p == "stripe" %}Pay with international card (Stripe){% else %}Pay (demo mode){% endif %}</button>{% empty %}<p>Payments are not configured yet. Set Razorpay or Stripe keys.</p>{% endfor %}</form></div></section>{% endblock %}

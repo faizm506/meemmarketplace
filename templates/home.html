@@ -1,0 +1,30 @@
+{% extends "base.html" %}{% load ui %}
+{% block content %}
+<section class="relative overflow-hidden bg-gradient-to-b from-indigo via-indigo to-[#2d3f6b] text-ivory">
+ <div class="absolute inset-0 jali opacity-60"></div>
+ <div id="sun" class="absolute right-[12%] top-24 w-40 h-40 rounded-full bg-gradient-to-br from-gold to-terra opacity-90 blur-[1px]" style="animation:float 7s ease-in-out infinite"></div>
+ <svg id="skyline" class="absolute bottom-0 inset-x-0 w-full text-ivory" viewBox="0 0 1200 160" preserveAspectRatio="none" fill="currentColor" aria-hidden="true">
+  <path d="M0 160V110h60V90q20-30 40 0v20h50V70l15-25 15 25v40h70V95q25-45 50 0v15h80V80h20V60l20-20 20 20v20h60v30h90V85q30-50 60 0v25h80V100h40V70q15-30 30 0v30h60v10h90V90q20-35 40 0v20h80v50z"/></svg>
+ <div class="relative max-w-6xl mx-auto px-4 pt-24 pb-44 md:pt-36 md:pb-56">
+  <p class="reveal text-gold font-semibold tracking-widest text-xs uppercase">UNESCO World Heritage City · Ahmedabad</p>
+  <h1 class="reveal font-serif text-5xl md:text-7xl font-bold mt-4 max-w-3xl leading-[1.05]">{% t "Walk through 600 years of stories." %}</h1>
+  <p class="reveal mt-6 text-lg text-ivory/80 max-w-xl">Book heritage walks led by verified local guides, historians and storytellers through the pols, bazaars and monuments of the old city.</p>
+  <div class="reveal mt-8 flex flex-wrap gap-3"><a href="{% url 'tour_list' %}" class="btn">{% t "Explore walks" %}</a><a href="{% url 'signup' %}" class="btn btn-ghost !text-ivory !border-ivory/60 hover:!bg-ivory hover:!text-indigo">{% t "Become a partner" %}</a></div>
+ </div>
+</section>
+<section class="max-w-6xl mx-auto px-4 py-16">
+ <div class="grid grid-cols-3 gap-4 text-center">
+  <div class="reveal"><p class="font-serif text-4xl text-terra" data-count="{{ tour_count }}">0</p><p class="text-sm">Curated walks</p></div>
+  <div class="reveal"><p class="font-serif text-4xl text-terra" data-count="600">0</p><p class="text-sm">Years of history</p></div>
+  <div class="reveal"><p class="font-serif text-4xl text-terra" data-count="2000">0</p><p class="text-sm">Houses in the pols</p></div>
+ </div>
+ <h2 class="reveal font-serif text-3xl md:text-4xl mt-16">{% t "Featured walks" %}</h2>
+ <div class="grid gap-6 mt-8 sm:grid-cols-2 lg:grid-cols-3">{% for t in featured %}{% include "_card.html" %}{% empty %}<p>Run <code>python manage.py seed</code> to load demo walks.</p>{% endfor %}</div>
+ <h2 class="reveal font-serif text-3xl md:text-4xl mt-16">Find your kind of walk</h2>
+ <div class="flex flex-wrap gap-3 mt-6">{% for c in categories %}<a class="reveal btn btn-ghost" href="{% url 'tour_list' %}?category={{ c.slug }}">{% icon c.icon "w-4 h-4" %} {{ c.name }}</a>{% endfor %}</div>
+</section>
+{% endblock %}
+{% block scripts %}<script>
+document.querySelectorAll('[data-count]').forEach(el=>{const to=+el.dataset.count;let n=0;const step=Math.max(1,Math.ceil(to/50));const t=setInterval(()=>{n=Math.min(to,n+step);el.textContent=n+(to>=600?'+':'');if(n>=to)clearInterval(t)},25)});
+if(!matchMedia('(prefers-reduced-motion:reduce)').matches){addEventListener('scroll',()=>{const y=scrollY;document.getElementById('sun').style.transform=`translateY(${y*.25}px)`;document.getElementById('skyline').style.transform=`translateY(${y*.06}px)`},{passive:true})}
+</script>{% endblock %}
