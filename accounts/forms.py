@@ -1,4 +1,5 @@
 from django import forms
+<<<<<<< HEAD
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 
 from core import security
@@ -51,3 +52,12 @@ class LoginForm(StyledMixin, AuthenticationForm):
         if username and security.is_throttled(self.request, username):
             raise forms.ValidationError("Too many sign-in attempts. Please wait 15 minutes and try again.")
         return super().clean()
+=======
+from django.contrib.auth.forms import UserCreationForm
+from .models import User
+class SignupForm(UserCreationForm):
+    role = forms.ChoiceField(choices=[("tourist", "I'm a traveller"), ("partner", "I'm a guide / partner")])
+    class Meta:
+        model = User
+        fields = ("email", "first_name", "role")
+>>>>>>> 45224bb2107e9c064747289981fd5709c63dc9c9

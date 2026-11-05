@@ -1,0 +1,12 @@
+{% extends "base.html" %}{% load ui %}{% block title %}Walks · {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="max-w-6xl mx-auto px-4 py-10">
+ <h1 class="font-serif text-4xl">{% t "Heritage walks in Ahmedabad" %}</h1>
+ <form method="get" class="grid gap-3 mt-6 md:grid-cols-4" role="search">
+  <input name="q" value="{{ q }}" placeholder="Search pols, food, mosques…" aria-label="Search">
+  <select name="category" aria-label="Category"><option value="">All categories</option>{% for c in categories %}<option value="{{ c.slug }}" {% if c.slug == cat %}selected{% endif %}>{{ c.name }}</option>{% endfor %}</select>
+  <input name="max_price" type="number" min="0" value="{{ mx }}" placeholder="Max price ₹" aria-label="Max price">
+  <button class="btn">{% t "Search" %}</button>
+ </form>
+ <div class="grid gap-6 mt-8 sm:grid-cols-2 lg:grid-cols-3">{% for t in tours %}{% include "_card.html" %}{% empty %}<p>No walks match yet.</p>{% endfor %}</div>
+</section>{% endblock %}

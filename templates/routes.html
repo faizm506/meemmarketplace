@@ -1,0 +1,97 @@
+{% extends "base.html" %}{% load ui %}{% block title %}Heritage routes · {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<style>
+.base{color:#E8D5B7}html.dark .base{color:#2b3a5e}
+.stop{opacity:.3;transform:scale(.7);transform-box:fill-box;transform-origin:center;transition:opacity .5s,transform .6s cubic-bezier(.2,.8,.2,1);cursor:pointer;outline:none}
+.stop.on{opacity:1;transform:scale(1)}.stop:focus-visible circle{stroke:#E3A72F;stroke-width:4}
+.stop circle{fill:#FBF8F3;stroke:#C65D3B;stroke-width:2.2;transition:fill .3s}html.dark .stop circle{fill:#17223d}
+.stop text{font:600 9px Inter,sans-serif;fill:#1B2A49;text-anchor:middle;dominant-baseline:central;pointer-events:none}html.dark .stop text{fill:#f1ece2}
+.stop.cur circle{fill:#C65D3B}.stop.cur text{fill:#fff}
+.pulse{animation:pulse 1.8s ease-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes pulse{from{transform:scale(.6);opacity:.8}to{transform:scale(2.8);opacity:0}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}.fade{animation:fadeUp .5s both}
+.tab{white-space:nowrap;min-height:44px;padding:0 1.1rem;border-radius:999px;border:1.5px solid #E8D5B7;font-weight:600;background:transparent;transition:background .3s,color .3s}
+.tab[aria-selected=true]{background:#1B2A49;color:#FBF8F3;border-color:#1B2A49}html.dark .tab[aria-selected=true]{background:#E3A72F;color:#1B2A49;border-color:#E3A72F}
+input[type=range]{border:0;padding:0;min-height:32px;accent-color:#C65D3B;background:transparent}
+#list button{display:flex;gap:.75rem;align-items:center;width:100%;text-align:left;min-height:44px;padding:.4rem .6rem;border-radius:14px;transition:background .25s}
+#list button:hover,#list button.cur{background:rgba(198,93,59,.12)}#list b{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:11px;border:1.5px solid #C65D3B}
+#list button.cur b{background:#C65D3B;color:#fff}
+</style>
+<section class="max-w-6xl mx-auto px-4 py-8">
+ <p class="text-terra font-semibold text-xs uppercase tracking-widest">Heritage routes</p>
+ <h1 class="font-serif text-4xl md:text-5xl mt-1" id="rt"></h1><p class="mt-2 text-indigo/70 max-w-xl" id="rs"></p>
+ <div class="flex gap-2 mt-5 overflow-x-auto pb-1" role="tablist" aria-label="Choose a route">{% for r in routes %}<button class="tab" role="tab" data-i="{{ forloop.counter0 }}">{{ r.title }}</button>{% endfor %}</div>
+ <div id="meta" class="flex flex-wrap gap-2 mt-4 text-xs font-semibold"></div>
+ <div class="grid gap-6 mt-5 lg:grid-cols-[1fr_380px] items-start">
+  <div id="stage" class="jali rounded-[2rem] bg-white border border-sand/70 shadow-xl shadow-indigo/10 p-2 sm:p-4">
+   <svg viewBox="0 0 360 560" class="w-full h-auto max-h-[78vh] mx-auto" role="img" aria-label="Animated route map">
+    <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E3A72F"/><stop offset="1" stop-color="#C65D3B"/></linearGradient></defs>
+    <path id="base" class="base" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <path id="anim" fill="none" stroke="url(#g)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <g id="stops"></g>
+    <g id="dot"><circle class="pulse" r="9" fill="#E3A72F"/><circle r="6" fill="#E3A72F" stroke="#fff" stroke-width="2.5"/></g>
+   </svg>
+  </div>
+  <div class="lg:sticky lg:top-24 space-y-4">
+   <div id="capbox" class="rounded-3xl bg-white border border-sand/70 p-5 shadow-lg shadow-indigo/10">
+    <p id="cap-n" class="text-xs font-semibold text-terra uppercase tracking-wide"></p><p id="cap-t" class="font-serif text-2xl mt-1"></p><p id="cap-d" class="text-sm text-indigo/70 mt-1 min-h-[1.25rem]"></p>
+    <div class="flex items-center gap-3 mt-4"><button id="play" class="btn !px-5" type="button">Play</button><input id="scrub" type="range" min="0" max="1000" value="0" aria-label="Route progress"></div>
+   </div>
+   <ol id="list" class="rounded-3xl bg-white border border-sand/70 p-2 max-h-[40vh] overflow-y-auto"></ol>
+  </div>
+ </div>
+ <p class="text-xs text-indigo/60 mt-8 max-w-2xl">Routes are stylised redrawings of the publicly shared Ahmedabad heritage walk route maps, not to scale. {{ SITE_NAME }} is an independent platform and is not affiliated with the Ahmedabad Municipal Corporation. Check timings and booking with the operator before you go.</p>
+</section>
+{{ routes|json_script:"routes-data" }}
+{% endblock %}
+{% block scripts %}<script>
+(()=>{
+const DATA=JSON.parse(document.getElementById('routes-data').textContent),$=id=>document.getElementById(id),NS='http://www.w3.org/2000/svg';
+const W=360,H=560,PAD=30,reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const base=$('base'),anim=$('anim'),stopsG=$('stops'),dot=$('dot'),scrub=$('scrub'),playBtn=$('play'),list=$('list');
+let R,P,S,L,prog=0,playing=false,last=0,cur=-1,seen=false;
+const el=(n,a,p)=>{const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e};
+function rounded(P,r){let d='M'+P[0].X+' '+P[0].Y;for(let i=1;i<P.length-1;i++){const a=P[i-1],b=P[i],c=P[i+1],l1=Math.hypot(b.X-a.X,b.Y-a.Y)||1,l2=Math.hypot(c.X-b.X,c.Y-b.Y)||1,r1=Math.min(r,l1/2),r2=Math.min(r,l2/2);
+d+='L'+(b.X+(a.X-b.X)*r1/l1)+' '+(b.Y+(a.Y-b.Y)*r1/l1)+'Q'+b.X+' '+b.Y+' '+(b.X+(c.X-b.X)*r2/l2)+' '+(b.Y+(c.Y-b.Y)*r2/l2)}
+const z=P[P.length-1];return d+'L'+z.X+' '+z.Y}
+function build(i){
+ R=DATA[i];playing=false;
+ document.querySelectorAll('.tab').forEach((b,j)=>b.setAttribute('aria-selected',j===i));
+ $('rt').textContent=R.title;$('rs').textContent=R.subtitle;
+ const xs=R.pts.map(p=>p.x),ys=R.pts.map(p=>p.y),x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
+ const sc=Math.min((W-2*PAD)/(x1-x0),(H-2*PAD)/(y1-y0)),ox=(W-(x1-x0)*sc)/2,oy=(H-(y1-y0)*sc)/2;
+ P=R.pts.map(p=>Object.assign({},p,{X:(p.x-x0)*sc+ox,Y:(p.y-y0)*sc+oy}));
+ const d=rounded(P,14);base.setAttribute('d',d);anim.setAttribute('d',d);
+ L=anim.getTotalLength();anim.style.strokeDasharray=L;stopsG.innerHTML='';list.innerHTML='';
+ const N=400,smp=[];for(let k=0;k<=N;k++)smp.push(anim.getPointAtLength(L*k/N));
+ S=P.filter(p=>p.s).map(p=>{let best=0,bd=1e9;smp.forEach((q,k)=>{const dd=(q.x-p.X)**2+(q.y-p.Y)**2;if(dd<bd){bd=dd;best=k}});
+  const g=el('g',{class:'stop',tabindex:0,role:'button','aria-label':p.name},stopsG);el('circle',{cx:p.X,cy:p.Y,r:10.5},g);el('text',{x:p.X,y:p.Y},g).textContent=p.lab;
+  const li=document.createElement('li'),bt=document.createElement('button'),b=document.createElement('b'),sp=document.createElement('span');
+  bt.type='button';b.textContent=p.lab;sp.textContent=p.name;bt.append(b,sp);li.appendChild(bt);list.appendChild(li);
+  const s=Object.assign({},p,{len:L*best/N,g,bt});const go=()=>{playing=false;set(Math.min(1,s.len/L+.002));sync()};
+  bt.onclick=go;g.onclick=go;g.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}};return s});
+ const m=$('meta');m.innerHTML='';R.meta.concat([S.length+' stops']).forEach(t=>{const s=document.createElement('span');s.className='rounded-full bg-gold/25 px-3 py-1';s.textContent=t;m.appendChild(s)});
+ cur=-1;set(0);sync();
+}
+function set(p){
+ prog=Math.max(0,Math.min(1,p));anim.style.strokeDashoffset=L*(1-prog);
+ const pt=anim.getPointAtLength(prog*L);dot.setAttribute('transform','translate('+pt.x+' '+pt.y+')');
+ let c=0;S.forEach((s,k)=>{const on=prog*L>=s.len-2;s.g.classList.toggle('on',on);if(on)c=k});
+ if(c!==cur){cur=c;S.forEach((s,k)=>{s.g.classList.toggle('cur',k===c);s.bt.classList.toggle('cur',k===c)});
+  const s=S[c],box=$('capbox');$('cap-n').textContent='Stop '+(c+1)+' of '+S.length;$('cap-t').textContent=s.name;$('cap-d').textContent=s.note||'';
+  box.classList.remove('fade');void box.offsetWidth;box.classList.add('fade');
+  const lr=list.getBoundingClientRect(),br=s.bt.getBoundingClientRect();if(br.top<lr.top||br.bottom>lr.bottom)list.scrollTo({top:s.bt.offsetTop-list.offsetTop-60,behavior:reduce?'auto':'smooth'})}
+ scrub.value=Math.round(prog*1000);
+}
+function sync(){playBtn.textContent=playing?'Pause':(prog>=1?'Replay':'Play')}
+function tick(t){if(!playing)return;const dt=Math.min(.05,(t-last)/1000);last=t;
+ const near=Math.min(...S.map(s=>Math.abs(s.len-prog*L))),f=.4+.6*Math.min(1,near/16);
+ set(prog+f*dt/R.secs*1.6);if(prog>=1){playing=false;sync();return}requestAnimationFrame(tick)}
+function play(){if(prog>=1)set(0);playing=true;last=performance.now();sync();requestAnimationFrame(tick)}
+playBtn.onclick=()=>{playing?(playing=false,sync()):play()};
+scrub.oninput=()=>{playing=false;set(scrub.value/1000);sync()};
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{build(+b.dataset.i);if(reduce)set(1);else if(seen)play()});
+build(0);
+new IntersectionObserver((es,o)=>{if(es[0].isIntersecting){seen=true;o.disconnect();reduce?(set(1),sync()):play()}},{threshold:.35}).observe($('stage'));
+})();
+</script>{% endblock %}

@@ -1,0 +1,7 @@
+{% extends "base.html" %}{% load ui %}{% block content %}
+<section class="max-w-3xl mx-auto px-4 py-10"><h1 class="font-serif text-4xl">My bookings</h1>
+{% for b in bookings %}<div class="reveal mt-4 rounded-3xl bg-white border border-sand/70 p-5 flex flex-wrap items-center justify-between gap-3">
+ <div><p class="font-semibold">{{ b.slot.tour.title }}</p><p class="text-sm text-indigo/70">{{ b.slot.date|date:"D, d M Y" }} · {{ b.guests }} guest(s) · ₹{{ b.total }} · <span class="uppercase">{{ b.status }}</span></p></div>
+ <div class="flex gap-2"><a class="btn btn-ghost" href="{% url 'ticket' b.code %}">Ticket</a>{% if b.status == "pending" %}<a class="btn" href="{% url 'checkout' b.code %}">{% t "Pay now" %}</a>{% elif b.status == "confirmed" and b.slot.date <= today %}<a class="btn" href="{% url 'review' b.code %}">Review</a>{% endif %}
+ {% if b.status != "cancelled" %}<form method="post" action="{% url 'cancel' b.code %}">{% csrf_token %}<button class="btn btn-ghost">Cancel</button></form>{% endif %}</div></div>
+{% empty %}<p class="mt-6">No bookings yet. <a class="underline" href="{% url 'tour_list' %}">Find a walk</a>.</p>{% endfor %}</section>{% endblock %}

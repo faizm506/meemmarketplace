@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% load ui %}{% block content %}
+<section class="max-w-md mx-auto px-4 py-10"><div class="rounded-3xl overflow-hidden bg-white border border-sand shadow-2xl shadow-indigo/20">
+ <div class="jali bg-gradient-to-br from-indigo to-[#2d3f6b] text-ivory p-6 text-center"><svg class="mx-auto" width="56" height="56" viewBox="0 0 56 56" fill="none" stroke="#E3A72F" stroke-width="3" aria-hidden="true"><circle cx="28" cy="28" r="24" stroke-dasharray="151" stroke-dashoffset="151"><animate attributeName="stroke-dashoffset" to="0" dur=".9s" fill="freeze"/></circle><path d="M16 29l9 9 16-18" stroke-dasharray="50" stroke-dashoffset="50"><animate attributeName="stroke-dashoffset" to="0" begin=".7s" dur=".5s" fill="freeze"/></path></svg>
+ <p class="font-serif text-2xl mt-2">{{ b.status|title }}</p></div>
+ <div class="p-6 space-y-2 text-sm"><p class="font-serif text-2xl">{{ b.slot.tour.title }}</p>
+ <p>{% icon "calendar" "w-4 h-4 inline" %} {{ b.slot.date|date:"l, d F Y" }} · {{ b.slot.time|time:"h:i A" }}</p><p>{% icon "pin" "w-4 h-4 inline" %} {{ b.slot.tour.meeting_point }}</p><p>{% icon "users" "w-4 h-4 inline" %} {{ b.guests }} guest(s) · Total ₹{{ b.total }}</p>
+ <div class="mt-4 rounded-2xl border-2 border-dashed border-terra/50 text-center py-4">{% if b.status == "pending" %}<a class="btn mb-3" href="{% url 'checkout' b.code %}">{% t "Pay now" %}</a>{% endif %}<p class="text-xs uppercase text-indigo/60">Ticket code</p><p class="font-mono text-3xl tracking-widest">{{ b.code }}</p></div>
+ <p class="text-xs text-indigo/60">Show this code to your guide. Saved for offline viewing after your first visit.</p></div></div></section>{% endblock %}
