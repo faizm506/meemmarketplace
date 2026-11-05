@@ -1,9 +1,6 @@
-<<<<<<< HEAD
 Django>=5.1,<7.0
 Pillow>=10.0
 whitenoise>=6.6
 gunicorn>=22.0
-=======
 Django>=5.0,<6.0
 Pillow>=10.0
->>>>>>> 45224bb2107e9c064747289981fd5709c63dc9c9

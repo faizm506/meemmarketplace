@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # MEEM Version 1 (Django + SQLite)
 
 One trusted space for every Muslim-owned brand. Version 1 is a complete marketplace you can test today:
@@ -125,7 +124,6 @@ Payouts, charity transfers and gateway refunds are recorded by hand. Photos live
 Login is by username. Move to PostgreSQL, automatic payouts and courier APIs in Version 2.
 
 Made with purpose.
-=======
 # Virasat Walks – Ahmedabad heritage walk marketplace (Django 5 + SQLite)
 
     python -m venv venv && source venv/bin/activate   # Windows: venv\Scripts\activate
@@ -145,4 +143,4 @@ Next steps: Razorpay/Stripe payments, reviews, i18n strings, PWA, dark mode, 2FA
   With no keys and DEBUG=1, a demo "Pay" button appears. Refunds are flagged `refund_due`; issue them in the gateway dashboard.
 - Reviews with photo upload (re-encoded, 3 MB cap), hotel referral `?ref=CODE` + embed `/widget/HAVELI/` (iframe), commission shown in admin.
 - Dark mode toggle, installable PWA (`/manifest.webmanifest`, `/sw.js`), EN/HI/GU switcher, rate limits, CSP and security headers.
->>>>>>> 45224bb2107e9c064747289981fd5709c63dc9c9
+

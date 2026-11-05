@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from django.contrib.auth.views import LogoutView
 from django.urls import path
 
@@ -9,14 +8,4 @@ urlpatterns = [
     path("login/", views.MeemLoginView.as_view(), name="login"),
     path("logout/", LogoutView.as_view(), name="logout"),
     path("signup/", views.signup, name="signup"),
-=======
-from django.contrib.auth import views as v
-from django.urls import path
-from core.ratelimit import rate_limit
-from . import views
-urlpatterns = [
-    path("login/", rate_limit("login", 8, 300)(v.LoginView.as_view()), name="login"),
-    path("logout/", v.LogoutView.as_view(), name="logout"),
-    path("signup/", rate_limit("signup", 6, 600)(views.signup), name="signup"),
->>>>>>> 45224bb2107e9c064747289981fd5709c63dc9c9
 ]
